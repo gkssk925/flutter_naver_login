@@ -46,6 +46,17 @@ class FlutterNaverLogin {
       return _delayedToResult(
           NaverAccessToken._(accessToken.cast<String, dynamic>()));
   }
+  
+    static Future<NaverAccessToken> get currentRefreshToken async {
+    final Map<dynamic, dynamic>? refreshToken =
+        await _channel.invokeMethod('getCurrentRefreshToken');
+
+    if (refreshToken == null)
+      return NaverAccessToken._(noToken);
+    else
+      return _delayedToResult(
+          NaverAccessToken._(refreshToken.cast<String, dynamic>()));
+  }
 
   static Future<T> _delayedToResult<T>(T result) {
     return new Future.delayed(const Duration(milliseconds: 100), () => result);
@@ -58,11 +69,11 @@ class NaverLoginResult {
   final NaverLoginStatus status;
   final NaverAccountResult account;
   final String errorMessage;
-  final NaverAccessToken accessToken;
+  final NaverAccessToken token;
 
   NaverLoginResult._(Map<String, dynamic> map)
       : status = _parseStatus(map['status'] ?? ''),
-        accessToken = NaverAccessToken._(map),
+        token = NaverAccessToken._(map),
         errorMessage = map['errorMessage'] ?? '',
         account = new NaverAccountResult._(map);
 
@@ -80,13 +91,14 @@ class NaverLoginResult {
 
   @override
   String toString() =>
-      '{ status: $status, account: $account, errorMessage: $errorMessage, accessToken: $accessToken }';
+      '{ status: $status, account: $account, errorMessage: $errorMessage, token: $token }';
 }
 
 class NaverAccessToken {
   final String accessToken;
   final String expiresAt;
   final String tokenType;
+  final String refreshToken;
   bool isValid() {
     bool timeValid = Clock.now().isBefore(DateTime.parse(expiresAt));
     bool tokenExist = accessToken != 'no token';
@@ -96,11 +108,12 @@ class NaverAccessToken {
   NaverAccessToken._(Map<String, dynamic> map)
       : accessToken = map['accessToken'] ?? '',
         expiresAt = map['expiresAt'] ?? '',
-        tokenType = map['tokenType'] ?? '';
+        tokenType = map['tokenType'] ?? '',
+        refreshToken = map['refreshToken'] ?? '';
 
   @override
   String toString() =>
-      '{ accessToken: $accessToken, expiresAt: $expiresAt, tokenType: $tokenType }';
+      '{ accessToken: $accessToken, expiresAt: $expiresAt, tokenType: $tokenType, refreshToken: $refreshToken }';
 }
 
 class NaverAccountResult {
@@ -142,4 +155,5 @@ Map<String, dynamic> noToken = {
   'accessToken': 'no token',
   'expiresAt': 'no token',
   'tokenType': 'no token',
+  'refreshToken': 'no token',
 };
