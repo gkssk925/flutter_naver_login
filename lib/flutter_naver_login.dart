@@ -47,16 +47,7 @@ class FlutterNaverLogin {
           NaverAccessToken._(accessToken.cast<String, dynamic>()));
   }
   
-    static Future<NaverAccessToken> get currentRefreshToken async {
-    final Map<dynamic, dynamic>? refreshToken =
-        await _channel.invokeMethod('getCurrentRefreshToken');
 
-    if (refreshToken == null)
-      return NaverAccessToken._(noToken);
-    else
-      return _delayedToResult(
-          NaverAccessToken._(refreshToken.cast<String, dynamic>()));
-  }
 
   static Future<T> _delayedToResult<T>(T result) {
     return new Future.delayed(const Duration(milliseconds: 100), () => result);
